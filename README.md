@@ -13,13 +13,22 @@ SHA-256 checksum. It installs `/Applications/antiburn.app` by default.
 
 ## Updates
 
-antiburn can update itself. The cask declares `auto_updates true`, so normal
-bulk Homebrew upgrades can skip it. To request a Homebrew update explicitly:
+antiburn can update itself. The cask declares `auto_updates true`. Homebrew
+upgrade behavior depends on its version and settings; recent versions can
+include the app in normal upgrades. To request a Homebrew update explicitly:
 
 ```sh
 brew update
 brew upgrade --cask antiburn/tap/antiburn
 ```
+
+After an in-app update, `brew info` can still show the previous Homebrew
+installation receipt. When the tap catches up, a Homebrew upgrade can reinstall
+the current app and update that receipt. Native tests with Homebrew 6.0.18 and
+6.0.22 verified the 0.7.3-to-0.9.0 transition, including explicit and greedy
+upgrades while the tap still described 0.7.3. Those stale-tap upgrades preserved
+the newer app. This is a tested transition, not a guarantee for every Homebrew
+version. See the [support guide](https://github.com/antiburn/antiburn/blob/main/docs/support.md#installation-and-updates).
 
 ## Remove the app
 
