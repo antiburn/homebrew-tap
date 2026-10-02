@@ -103,8 +103,6 @@ for path in \
   "$data" \
   "$logs" \
   "$HOME/Library/Caches/ai.antiburn.desktop" \
-  "$HOME/Library/Preferences/ai.antiburn.desktop.plist" \
-  "$HOME/Library/Saved Application State/ai.antiburn.desktop.savedState" \
   "$HOME/Library/WebKit/ai.antiburn.desktop"; do
   test ! -e "$path"
 done

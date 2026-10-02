@@ -27,8 +27,6 @@ cask "antiburn" do
     "~/Library/Application Support/ai.antiburn.desktop",
     "~/Library/Caches/ai.antiburn.desktop",
     "~/Library/Logs/antiburn",
-    "~/Library/Preferences/ai.antiburn.desktop.plist",
-    "~/Library/Saved Application State/ai.antiburn.desktop.savedState",
     "~/Library/WebKit/ai.antiburn.desktop",
   ]
 end
