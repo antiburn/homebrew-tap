@@ -14,9 +14,14 @@ app=/Applications/antiburn.app
 database="$HOME/Library/Application Support/ai.antiburn.desktop/antiburn.sqlite3"
 logs="$HOME/Library/Logs/antiburn"
 updater=product/scripts/update-homebrew-cask.mjs
+export GIT_AUTHOR_NAME='github-actions[bot]'
+export GIT_AUTHOR_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
+export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
+export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 brew --version
 brew tap --custom-remote antiburn/tap "$GITHUB_WORKSPACE"
 cask_path="$(brew --repository antiburn/tap)/Casks/antiburn.rb"
+tap_path=$(brew --repository antiburn/tap)
 
 node --input-type=module -e '
   import { versionFromTag } from "./product/scripts/update-homebrew-cask.mjs";
@@ -47,11 +52,16 @@ JS
 }
 
 prepare_old_cask
+git -C "$tap_path" add Casks/antiburn.rb
+git -C "$tap_path" commit -s -m 'test: prepare older cask fixture'
 brew install --cask "$cask"
 test "$(bundle_version)" = "$from_version"
 node "$updater" "$TO_TAG" "$cask_path"
+git -C "$tap_path" add Casks/antiburn.rb
+git -C "$tap_path" commit -s -m "chore: update antiburn to $to_version"
 brew outdated --cask
-brew outdated --greedy --cask "$cask"
+brew outdated --greedy --cask
+brew upgrade --dry-run --cask
 brew upgrade --cask "$cask"
 test "$(bundle_version)" = "$to_version"
 brew uninstall --cask "$cask"
@@ -97,7 +107,7 @@ swift scripts/check-window.swift
 printf '%s\n' 'Stale tap after in-app update:'
 brew info --cask "$cask"
 brew outdated --cask
-brew outdated --greedy --cask "$cask"
+brew outdated --greedy --cask
 brew upgrade --cask "$cask"
 printf 'Bundle after explicit stale-tap upgrade: %s\n' "$(bundle_version)"
 brew upgrade --greedy --cask "$cask"
