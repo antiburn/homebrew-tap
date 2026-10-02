@@ -52,11 +52,23 @@ sqlite3 "$database" "INSERT OR REPLACE INTO setting (key, value) VALUES
 ANTIBURN_ANALYTICS_ENABLED=false "$app/Contents/MacOS/antiburn" &
 sleep 5
 swift scripts/check-window.swift
-sfltool dumpbtm | python3 -c '
-import sys
-dump = sys.stdin.read()
+python3 -c '
+import subprocess
+dump = subprocess.run(
+    ["sudo", "-n", "sfltool", "dumpbtm"],
+    check=True, capture_output=True, text=True, timeout=20,
+).stdout
 assert "ai.antiburn.desktop" in dump, "Login-item registration is missing"
 print("Login-item record is present")
+'
+
+python3 -c '
+from pathlib import Path
+library = Path.home() / "Library"
+for bucket in sorted(library.iterdir()):
+    if bucket.is_dir():
+        for path in sorted(bucket.glob("*ai.antiburn.desktop*")):
+            print("App-owned state:", path.relative_to(library))
 '
 
 brew uninstall --cask "$cask"
@@ -68,6 +80,14 @@ fi
 test -f "$database"
 test "$(sqlite3 "$database" "SELECT value FROM setting WHERE key = 'onboardingCompleted';")" = true
 test -d "$logs"
+python3 -c '
+import subprocess
+dump = subprocess.run(
+    ["sudo", "-n", "sfltool", "dumpbtm"],
+    check=True, capture_output=True, text=True, timeout=20,
+).stdout
+print("macOS retains a login-item record after app removal:", "ai.antiburn.desktop" in dump)
+'
 
 # These synthetic files prove that zap stays inside app-owned paths.
 mkdir -p "$HOME/.claude/projects/homebrew-test" "$HOME/homebrew-test-project"

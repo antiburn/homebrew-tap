@@ -51,4 +51,5 @@ jobs:
           brew livecheck --cask antiburn/tap/antiburn
 
       - name: Test installation, launch, and cleanup
+        timeout-minutes: 5
         run: bash scripts/test-install.sh
