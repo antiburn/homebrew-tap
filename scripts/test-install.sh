@@ -13,6 +13,7 @@ database="$data/antiburn.sqlite3"
 logs="$HOME/Library/Logs/antiburn"
 test ! -e "$app"
 test ! -e "$data"
+set -x
 
 brew install --cask "$cask"
 test "$(lipo -archs "$app/Contents/MacOS/antiburn")" = "$EXPECTED_ARCH"
@@ -24,7 +25,7 @@ codesign --verify --deep --strict "$app"
 spctl --assess --type execute "$app"
 xcrun stapler validate "$app"
 
-open --env ANTIBURN_ANALYTICS_ENABLED=false "$app"
+open --env ANTIBURN_ANALYTICS_ENABLED=false "$app" &
 for _ in {1..30}; do
   if test -f "$database"; then break; fi
   sleep 1
@@ -32,7 +33,7 @@ done
 test -f "$database"
 test -d "$logs"
 swift scripts/check-window.swift
-osascript -e 'tell application id "ai.antiburn.desktop" to quit'
+osascript -e 'with timeout of 10 seconds' -e 'tell application id "ai.antiburn.desktop" to quit' -e 'end timeout'
 for _ in {1..30}; do
   if ! pgrep -x antiburn >/dev/null; then break; fi
   sleep 1
@@ -47,7 +48,7 @@ sqlite3 "$database" "INSERT OR REPLACE INTO setting (key, value) VALUES
   ('onboardingCompleted', 'true'), ('launchAtLogin', 'true'),
   ('autoUpdate', 'false'), ('liveUsageEnabled', 'false'),
   ('notificationsEnabled', 'false'), ('discoveryPaused', 'true');"
-open --env ANTIBURN_ANALYTICS_ENABLED=false "$app"
+open --env ANTIBURN_ANALYTICS_ENABLED=false "$app" &
 sleep 5
 swift scripts/check-window.swift
 sfltool dumpbtm | python3 -c '
