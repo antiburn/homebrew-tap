@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  cask:
+    name: cask (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            arch: arm64
+          - os: macos-15-intel
+            arch: x86_64
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_ANALYTICS: "1"
+      HOMEBREW_NO_ENV_HINTS: "1"
+      EXPECTED_ARCH: ${{ matrix.arch }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Tap the checked-out revision
+        run: |
+          test "$(uname -m)" = "$EXPECTED_ARCH"
+          brew tap --custom-remote antiburn/tap "$GITHUB_WORKSPACE"
+
+      - name: Check style, audit, and livecheck
+        run: |
+          brew style --cask antiburn/tap/antiburn
+          brew audit --cask --strict --online antiburn/tap/antiburn
+          brew livecheck --cask antiburn/tap/antiburn
+
+      - name: Test installation, launch, and cleanup
+        run: bash scripts/test-install.sh
