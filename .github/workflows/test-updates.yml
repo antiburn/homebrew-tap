@@ -1,0 +1,68 @@
+name: Test Homebrew updates
+
+on:
+  workflow_dispatch:
+    inputs:
+      from_tag:
+        description: "Older published stable desktop tag"
+        type: string
+        default: antiburn-v0.7.3
+        required: true
+      to_tag:
+        description: "Current published desktop tag, matching the live updater"
+        type: string
+        default: antiburn-v0.9.0
+        required: true
+      product_ref:
+        description: "Product ref containing the cask updater script"
+        type: string
+        default: main
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  updates:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            arch: arm64
+          - os: macos-15-intel
+            arch: x86_64
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_ANALYTICS: "1"
+      HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_ARCH: ${{ matrix.arch }}
+      FROM_TAG: ${{ inputs.from_tag }}
+      TO_TAG: ${{ inputs.to_tag }}
+    steps:
+      - name: Checkout tap
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout product updater
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: antiburn/antiburn
+          ref: ${{ inputs.product_ref }}
+          path: product
+          sparse-checkout: scripts/update-homebrew-cask.mjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Install Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+
+      - name: Test Homebrew and signed in-app updates
+        timeout-minutes: 10
+        run: bash scripts/test-updates.sh
