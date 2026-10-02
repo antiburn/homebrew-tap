@@ -25,15 +25,16 @@ codesign --verify --deep --strict "$app"
 spctl --assess --type execute "$app"
 xcrun stapler validate "$app"
 
-open --env ANTIBURN_ANALYTICS_ENABLED=false "$app" &
-for _ in {1..30}; do
+ANTIBURN_ANALYTICS_ENABLED=false "$app/Contents/MacOS/antiburn" &
+app_pid=$!
+for _ in {1..60}; do
   if test -f "$database"; then break; fi
   sleep 1
 done
 test -f "$database"
 test -d "$logs"
 swift scripts/check-window.swift
-osascript -e 'with timeout of 10 seconds' -e 'tell application id "ai.antiburn.desktop" to quit' -e 'end timeout'
+kill -TERM "$app_pid"
 for _ in {1..30}; do
   if ! pgrep -x antiburn >/dev/null; then break; fi
   sleep 1
@@ -48,7 +49,7 @@ sqlite3 "$database" "INSERT OR REPLACE INTO setting (key, value) VALUES
   ('onboardingCompleted', 'true'), ('launchAtLogin', 'true'),
   ('autoUpdate', 'false'), ('liveUsageEnabled', 'false'),
   ('notificationsEnabled', 'false'), ('discoveryPaused', 'true');"
-open --env ANTIBURN_ANALYTICS_ENABLED=false "$app" &
+ANTIBURN_ANALYTICS_ENABLED=false "$app/Contents/MacOS/antiburn" &
 sleep 5
 swift scripts/check-window.swift
 sfltool dumpbtm | python3 -c '
