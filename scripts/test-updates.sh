@@ -104,10 +104,20 @@ codesign --verify --deep --strict "$app"
 spctl --assess --type execute "$app"
 swift scripts/check-window.swift
 
+pkill -TERM -x antiburn
+for _ in {1..30}; do
+  if ! pgrep -x antiburn >/dev/null; then break; fi
+  sleep 1
+done
+if pgrep -x antiburn >/dev/null; then exit 1; fi
+
 printf '%s\n' 'Stale tap after in-app update:'
 brew info --cask "$cask"
 brew outdated --cask
 brew outdated --greedy --cask
+brew upgrade --cask
+printf 'Bundle after bulk stale-tap upgrade: %s\n' "$(bundle_version)"
+test "$(bundle_version)" = "$to_version"
 brew upgrade --cask "$cask"
 printf 'Bundle after explicit stale-tap upgrade: %s\n' "$(bundle_version)"
 test "$(bundle_version)" = "$to_version"
@@ -115,12 +125,6 @@ brew upgrade --greedy --cask "$cask"
 printf 'Bundle after greedy stale-tap upgrade: %s\n' "$(bundle_version)"
 test "$(bundle_version)" = "$to_version"
 
-pkill -TERM -x antiburn
-for _ in {1..30}; do
-  if ! pgrep -x antiburn >/dev/null; then break; fi
-  sleep 1
-done
-if pgrep -x antiburn >/dev/null; then exit 1; fi
 node "$updater" "$TO_TAG" "$cask_path"
 brew upgrade --cask "$cask"
 test "$(bundle_version)" = "$to_version"
