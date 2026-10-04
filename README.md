@@ -14,8 +14,8 @@ SHA-256 checksum. It installs `/Applications/antiburn.app` by default.
 ## Updates
 
 antiburn can update itself. The cask declares `auto_updates true`. Homebrew
-upgrade behavior depends on its version and settings; recent versions can
-include the app in normal upgrades. To request a Homebrew update explicitly:
+upgrade behavior can depend on its version and settings. To request a Homebrew
+update explicitly:
 
 ```sh
 brew update
@@ -23,12 +23,14 @@ brew upgrade --cask antiburn/tap/antiburn
 ```
 
 After an in-app update, `brew info` can still show the previous Homebrew
-installation receipt. When the tap catches up, a Homebrew upgrade can reinstall
-the current app and update that receipt. Native tests with Homebrew 6.0.18 and
-6.0.22 verified the 0.7.3-to-0.9.0 transition, including explicit and greedy
-upgrades while the tap still described 0.7.3. Those stale-tap upgrades preserved
-the newer app. This is a tested transition, not a guarantee for every Homebrew
-version. See the [support guide](https://github.com/antiburn/antiburn/blob/main/docs/support.md#installation-and-updates).
+installation receipt. When the tap catches up, an explicit cask upgrade can
+reinstall the current app and update that receipt. Native tests with Homebrew
+6.0.18 and 6.0.22 verified the 0.7.3-to-0.9.0 transition. While the tap still
+described 0.7.3, normal bulk, explicit, and `--greedy` cask upgrades preserved the
+newer 0.9.0 app. Explicit and greedy upgrades reported that the latest version
+was already installed. After the tap advanced to 0.9.0, an explicit cask
+upgrade reconciled Homebrew's receipt to 0.9.0. This result is limited to that
+tested transition and those Homebrew versions. See the [support guide](https://github.com/antiburn/antiburn/blob/main/docs/support.md#installation-and-updates).
 
 ## Remove the app
 
