@@ -1,9 +1,9 @@
 cask "antiburn" do
   arch arm: "aarch64", intel: "x64"
 
-  version "0.9.0"
-  sha256 arm:   "c58945894abfc18bfeaf89ada93b5a13a79a76b15ea73c9572923639311d8377",
-         intel: "aade5e1baf7c46138dc0310e39bc4fcc465680c4f6da675baa0e659459e66476"
+  version "0.10.0"
+  sha256 arm:   "f81521ab5164421a355af5a3401fe8da4fd41ff586f68afa1b970411a28d9fdc",
+         intel: "c125c5b0e391ef801d926a3ffb023a2de2e7af71b56b40425d55ea70e78ab74c"
 
   url "https://github.com/antiburn/antiburn/releases/download/antiburn-v#{version}/antiburn_#{version}_#{arch}.dmg"
   name "antiburn"
