@@ -1,6 +1,6 @@
 # antiburn Homebrew tap
 
-Install the [antiburn](https://antiburn.com) desktop app on macOS 13 or later.
+Install the [antiburn](https://antiburn.com/?utm_source=homebrew&utm_medium=readme&utm_campaign=tap-readme) desktop app on macOS 13 or later.
 Native packages are available for Apple silicon and Intel.
 
 ```sh
